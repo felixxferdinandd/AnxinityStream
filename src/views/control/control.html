@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnxinityStream - Broadcast Studio</title>
+  <link rel="stylesheet" href="control.css">
+</head>
+<body>
+  <div class="studio-app">
+    
+    <!-- Top Navigation & Brand Header -->
+    <header class="studio-navbar">
+      <div class="nav-left">
+        <div class="brand-badge">
+          <span id="brand-logo-slot"></span>
+          <div class="brand-text">
+            <span class="brand-name">AnxinityStream</span>
+            <span class="brand-edition">STUDIO EDITION</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" id="main-nav-tabs">
+        <button class="nav-tab active" data-tab="tab-deck">
+          <span class="tab-label">Studio Deck</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-settings">
+          <span class="tab-label">Overlay & Display</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-simulator">
+          <span class="tab-label">Simulator</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-guide">
+          <span class="tab-label">Panduan & Hotkey</span>
+        </button>
+      </nav>
+
+      <div class="nav-right">
+        <div class="status-indicator-pill" id="global-broadcast-pill">
+          <span class="pulse-dot"></span>
+          <span class="status-label" id="global-broadcast-text">STANDBY</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="studio-workspace">
+
+      <!-- ================= TAB 1: STUDIO DECK ================= -->
+      <section id="tab-deck" class="tab-panel active">
+        <div class="deck-grid">
+          
+          <!-- Column 1: Channel Stream Inputs -->
+          <div class="deck-col channels-col">
+            
+            <!-- YouTube Channel Box -->
+            <div class="channel-card" id="yt-channel-card">
+              <div class="channel-card-header">
+                <div class="channel-identity">
+                  <span id="yt-logo-slot"></span>
+                  <div>
+                    <h3 class="channel-name">YouTube Live</h3>
+                    <span class="channel-caption">Siaran langsung YouTube</span>
+                  </div>
+                </div>
+                <span id="yt-status-badge" class="badge badge-idle">OFFLINE</span>
+              </div>
+
+              <div class="input-action-group">
+                <input 
+                  type="text" 
+                  id="yt-input" 
+                  class="studio-input" 
+                  placeholder="URL Live, Video ID, atau @ChannelHandle" 
+                  autocomplete="off" 
+                  spellcheck="false"
+                />
+                <button id="yt-connect-btn" class="btn btn-action-yt">Sambungkan</button>
+              </div>
+
+              <!-- Stream info sub-bar -->
+              <div class="channel-info-bar" id="yt-info-bar">
+                <span class="info-tag">Input otomatis terkunci saat tersambung.</span>
+              </div>
+            </div>
+
+            <!-- TikTok Channel Box -->
+            <div class="channel-card" id="tt-channel-card">
+              <div class="channel-card-header">
+                <div class="channel-identity">
+                  <span id="tt-logo-slot"></span>
+                  <div>
+                    <h3 class="channel-name">TikTok LIVE</h3>
+                    <span class="channel-caption">Koneksi WebSocket langsung (Bebas Login)</span>
+                  </div>
+                </div>
+                <span id="tt-status-badge" class="badge badge-idle">OFFLINE</span>
+              </div>
+
+              <div class="input-action-group">
+                <div class="input-prefix-box">
+                  <span class="prefix-char">@</span>
+                  <input 
+                    type="text" 
+                    id="tt-input" 
+                    class="studio-input input-with-prefix" 
+                    placeholder="username (saat sedang LIVE)" 
+                    autocomplete="off" 
+                    spellcheck="false"
+                  />
+                </div>
+                <button id="tt-connect-btn" class="btn btn-action-tt">Sambungkan</button>
+              </div>
+
+              <!-- Live TikTok Stats Bar -->
+              <div class="channel-info-bar" id="tt-info-bar">
+                <div class="tt-stat-chip">
+                  <span class="chip-label">Viewers:</span>
+                  <span class="chip-val" id="tt-viewers-display">0</span>
+                </div>
+                <div class="tt-stat-chip">
+                  <span class="chip-label">Likes:</span>
+                  <span class="chip-val" id="tt-likes-display">0</span>
+                </div>
+                <div class="tt-stat-chip">
+                  <span class="chip-label">Status:</span>
+                  <span class="chip-val" id="tt-room-status">Standby</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Master Ghost Mode Lock Deck -->
+            <div class="ghost-deck-card" id="ghost-deck-card">
+              <div class="ghost-deck-left">
+                <div class="ghost-status-row">
+                  <span id="ghost-icon-slot"></span>
+                  <h4 class="ghost-title" id="ghost-panel-title">Mode Interaktif (Bisa Digeser)</h4>
+                  <span class="hotkey-capsule">F9</span>
+                </div>
+                <p class="ghost-caption" id="ghost-panel-desc">
+                  Tekan <kbd>F9</kbd> untuk mengaktifkan <strong>Ghost Mode (Tembus Klik)</strong> agar mouse tembus ke game tanpa mengganggu klik.
+                </p>
+              </div>
+              <button id="btn-toggle-ghost" class="btn btn-ghost-toggle">Kunci Overlay (F9)</button>
+            </div>
+
+            <!-- Overlay Quick Control Actions -->
+            <div class="quick-tools-row">
+              <button id="btn-open-overlay" class="btn btn-tool">Buka / Reset Jendela Overlay</button>
+              <button id="btn-clear-chat" class="btn btn-tool">Bersihkan Chat</button>
+            </div>
+
+          </div>
+
+          <!-- Column 2: Live Feed Monitor & Audio Deck -->
+          <div class="deck-col monitor-col">
+            
+            <div class="monitor-card">
+              <div class="monitor-header">
+                <div class="monitor-title-group">
+                  <span class="monitor-dot"></span>
+                  <span class="monitor-heading">Live Feed Monitor</span>
+                  <span class="feed-count-badge" id="feed-count-badge">0 pesan</span>
+                </div>
+                <div class="monitor-actions">
+                  <button id="btn-clear-monitor" class="icon-tool-btn" title="Hapus Tampilan Feed">
+                    <span id="trash-icon-slot"></span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Live Preview Feed Screen -->
+              <div class="live-monitor-screen" id="live-monitor-screen">
+                <div class="empty-feed-placeholder" id="empty-feed-placeholder">
+                  <span class="placeholder-icon"></span>
+                  <p>Menunggu pesan chat dari YouTube atau TikTok...</p>
+                  <span class="placeholder-hint">Pesan chat, SuperChat, dan gift akan muncul di sini secara real-time.</span>
+                </div>
+                <div class="monitor-chat-list" id="monitor-chat-list"></div>
+              </div>
+
+              <!-- Studio Sliders Deck (Opacity & Volume) -->
+              <div class="monitor-sliders-deck">
+                <div class="slider-row">
+                  <div class="slider-meta">
+                    <span class="slider-title">Transparansi Latar (Opacity):</span>
+                    <span class="slider-number" id="deck-opacity-val">70%</span>
+                  </div>
+                  <input type="range" id="deck-opacity-slider" min="5" max="100" value="70" class="pro-slider" />
+                </div>
+
+                <div class="slider-row">
+                  <div class="slider-meta">
+                    <span class="slider-title">Volume Suara Donasi & Gift:</span>
+                    <span class="slider-number" id="deck-volume-val">80%</span>
+                  </div>
+                  <input type="range" id="deck-volume-slider" min="0" max="100" value="80" class="pro-slider" />
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: OVERLAY & DISPLAY ================= -->
+      <section id="tab-settings" class="tab-panel">
+        <div class="settings-panel-grid">
+          
+          <div class="settings-card">
+            <h3 class="panel-section-title">Ukuran Teks & Tipografi Chat</h3>
+            <p class="panel-section-caption">Pilih skala font agar mudah terbaca di atas resolusi monitor kamu.</p>
+            
+            <div class="segmented-pill-control" id="font-size-control">
+              <button class="pill-btn" data-size="sm">Kecil (11px)</button>
+              <button class="pill-btn active" data-size="md">Sedang (13px)</button>
+              <button class="pill-btn" data-size="lg">Besar (15px)</button>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h3 class="panel-section-title">Filter & Notifikasi Layar</h3>
+            <p class="panel-section-caption">Sesuaikan elemen mana saja yang ditampilkan di overlay game.</p>
+            
+            <div class="switch-list">
+              <label class="switch-row">
+                <div class="switch-info">
+                  <span class="switch-title">Tampilkan Waktu Komentar (Timestamp)</span>
+                  <span class="switch-sub">Menampilkan waktu [JJ:MM:DD] di sebelah kiri setiap pesan</span>
+                </div>
+                <input type="checkbox" id="toggle-timestamp" checked class="switch-toggle" />
+              </label>
+
+              <label class="switch-row">
+                <div class="switch-info">
+                  <span class="switch-title">Notifikasi Transient TikTok (Like / Join / Follow)</span>
+                  <span class="switch-sub">Otomatis menghilang sendiri dalam 4 detik agar chat utama tidak tertimbun</span>
+                </div>
+                <input type="checkbox" id="toggle-transients" checked class="switch-toggle" />
+              </label>
+
+              <label class="switch-row">
+                <div class="switch-info">
+                  <span class="switch-title">Always On Top (Selalu di Atas Game)</span>
+                  <span class="switch-sub">Menjaga overlay chat tetap berada di lapisan teratas layar monitor</span>
+                </div>
+                <input type="checkbox" id="toggle-always-top" checked class="switch-toggle" />
+              </label>
+
+              <label class="switch-row">
+                <div class="switch-info">
+                  <span class="switch-title">Suara Notifikasi Hype (Web Audio Fanfare)</span>
+                  <span class="switch-sub">Memainkan nada harmonik saat donasi SuperChat atau TikTok Gift masuk</span>
+                </div>
+                <input type="checkbox" id="toggle-sound" checked class="switch-toggle" />
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: SIMULATOR ================= -->
+      <section id="tab-simulator" class="tab-panel">
+        <div class="simulator-panel-card">
+          <div class="simulator-head">
+            <h3 class="panel-section-title">Simulator Event Donasi & Chat</h3>
+            <p class="panel-section-caption">Uji coba tampilan overlay dan efek suara sebelum kamu memulai siaran langsung.</p>
+          </div>
+
+          <div class="sim-actions-grid">
+            <div class="sim-block">
+              <span class="sim-block-label">Simulasi Pesan Biasa</span>
+              <div class="sim-btn-row">
+                <button id="sim-yt-chat" class="btn btn-sim">Pesan YouTube</button>
+                <button id="sim-tt-chat" class="btn btn-sim">Pesan TikTok</button>
+                <button id="sim-tt-like" class="btn btn-sim">Like (Hilang 4s)</button>
+              </div>
+            </div>
+
+            <div class="sim-block">
+              <span class="sim-block-label">Simulasi Donasi & Gift Hype</span>
+              <div class="sim-btn-row">
+                <button id="sim-yt-sc" class="btn btn-sim-gold">SuperChat ($10.00)</button>
+                <button id="sim-tt-gift" class="btn btn-sim-neon">TikTok Gift (Paus x1)</button>
+                <button id="sim-tt-roses" class="btn btn-sim-neon">TikTok Mawar (x10)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: PANDUAN & HOTKEY ================= -->
+      <section id="tab-guide" class="tab-panel">
+        <div class="guide-panel-card">
+          <h2 class="guide-title">Panduan Penggunaan AnxinityStream</h2>
+          <p class="guide-lead">Solusi komprehensif bagi streamer 1 monitor untuk membaca chat YouTube & TikTok sekaligus saat bermain game.</p>
+
+          <div class="guide-steps-list">
+            <div class="guide-step-item">
+              <div class="step-badge">1</div>
+              <div class="step-content">
+                <h4>Menghubungkan YouTube Live</h4>
+                <p>Cukup salin link siaran langsung YouTube kamu (contoh: <code>https://youtube.com/watch?v=xxxx</code>) atau masukkan handle channel (contoh: <code>@NamaChannel</code>). Klik <strong>Sambungkan</strong>. Kolom otomatis terkunci saat aktif.</p>
+              </div>
+            </div>
+
+            <div class="guide-step-item">
+              <div class="step-badge">2</div>
+              <div class="step-content">
+                <h4>Menghubungkan TikTok LIVE (100% Bebas Login)</h4>
+                <p>Masukkan username TikTok kamu (contoh: <code>mooniyelle</code>). Tidak perlu login, tidak perlu password, dan tidak butuh API key. Aplikasi langsung terhubung via WebSocket.</p>
+              </div>
+            </div>
+
+            <div class="guide-step-item">
+              <div class="step-badge">3</div>
+              <div class="step-content">
+                <h4>Menggunakan Ghost Mode (Hotkey: F9)</h4>
+                <p>Pindahkan jendela chat overlay ke sudut layar game yang nyaman. Buka game kamu (disarankan mode <em>Borderless Windowed</em>). Tekan <kbd>F9</kbd> untuk mengunci overlay menjadi tembus klik kursor mouse!</p>
+              </div>
+            </div>
+
+            <div class="guide-step-item">
+              <div class="step-badge">4</div>
+              <div class="step-content">
+                <h4>Mengatur Opacity Langsung di Overlay</h4>
+                <p>Di header atas jendela chat overlay, tersedia slider mini transparansi langsung. Kamu bisa menggesernya secara realtime tanpa perlu alt-tab ke menu kontrol!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- App Bottom Footer Bar -->
+    <footer class="studio-footer">
+      <div class="footer-left">
+        <span class="footer-copy">AnxinityStream Studio &bull; Developed by Felix Ferdinand</span>
+      </div>
+      <div class="footer-right">
+        <span class="footer-status" id="footer-activity-text">Sistem siap menerima koneksi siaran.</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="../../assets/icons.js"></script>
+  <script src="control.js"></script>
+</body>
+</html>

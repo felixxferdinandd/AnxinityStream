@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AnxinityStream Overlay</title>
+  <link rel="stylesheet" href="overlay.css">
+</head>
+<body class="unlocked font-md">
+  <div class="overlay-container" id="overlay-container">
+    
+    <!-- Top Header Bar (Interactive when unlocked) -->
+    <header class="overlay-header" id="overlay-header">
+      <!-- Drag Grip & Stream Stats -->
+      <div class="header-left">
+        <div class="drag-grip" title="Tahan & geser untuk memindahkan posisi">
+          <svg class="icon-drag" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="8" cy="4" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="8" cy="20" r="2"/>
+            <circle cx="16" cy="4" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="16" cy="20" r="2"/>
+          </svg>
+          <span class="app-tag">CHAT</span>
+        </div>
+
+        <!-- Live Viewers & Likes Stats -->
+        <div class="stream-stats-bar">
+          <div class="stat-pill" id="stat-viewers-pill" title="Total Penonton">
+            <svg class="stat-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span id="stat-viewers-count">0</span>
+          </div>
+          <div class="stat-pill" id="stat-likes-pill" title="Total Likes">
+            <svg class="stat-icon heart-icon" viewBox="0 0 24 24" width="12" height="12" fill="#FE2C55" stroke="#FE2C55" stroke-width="1">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            <span id="stat-likes-count">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Platform Connection Indicators -->
+      <div class="header-center">
+        <!-- YouTube Status -->
+        <div id="status-yt" class="platform-chip yt-chip offline" title="YouTube Live Status">
+          <svg class="brand-svg" viewBox="0 0 24 24" width="14" height="14" fill="none">
+            <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
+            <path fill="#FFFFFF" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+        </div>
+
+        <!-- TikTok Status -->
+        <div id="status-tt" class="platform-chip tt-chip offline" title="TikTok LIVE Status">
+          <svg class="brand-svg" viewBox="0 0 24 24" width="14" height="14" fill="none">
+            <path fill="#00F2FE" d="M16.6 5.82s.51.5 1.5 1.05a6.04 6.04 0 0 0 3.9 1.13V4.2a8.86 8.86 0 0 1-2.9-1.02A6.62 6.62 0 0 1 16.6.6v5.22z"/>
+            <path fill="#FE2C55" d="M12.4 12.87a3.55 3.55 0 0 1-3.55-3.55c0-.98.4-1.87 1.04-2.51l-3.32-3.32a8.23 8.23 0 0 0-2.4 5.83c0 4.56 3.7 8.26 8.26 8.26 3.84 0 7.07-2.63 7.97-6.21l-4.73-1.03a3.56 3.56 0 0 1-3.27 2.53z"/>
+            <path fill="#FFFFFF" d="M16.6 5.82V.6h-4.2v14.18a3.55 3.55 0 1 1-3.55-3.55c.42 0 .82.08 1.19.22V6.67a8.25 8.25 0 0 0-1.19-.09 8.26 8.26 0 0 0-8.26 8.26c0 4.56 3.7 8.26 8.26 8.26 4.3 0 7.84-3.29 8.21-7.48V8c1.37.99 3.07 1.57 4.9 1.57V5.37c-1.92 0-3.64-.81-4.86-2.1a5.88 5.88 0 0 1-.5-1.45z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Header Controls: Opacity Slider directly on Overlay! -->
+      <div class="header-right">
+        <!-- Direct Overlay Opacity Control -->
+        <div class="opacity-control-header" title="Atur Transparansi Latar Chat Langsung">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"/>
+          </svg>
+          <input type="range" id="overlay-opacity-slider" min="5" max="100" value="70" class="mini-slider" />
+          <span id="overlay-opacity-label" class="mini-val">70%</span>
+        </div>
+
+        <!-- Lock Button (Ghost Mode) -->
+        <button id="btn-lock" class="hdr-btn" title="Kunci Tembus Klik / Ghost Mode (Hotkey: F9)">
+          <svg class="icon-unlocked" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+          </svg>
+          <svg class="icon-locked" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </button>
+
+        <!-- Hide Overlay -->
+        <button id="btn-hide" class="hdr-btn" title="Sembunyikan Overlay">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Ghost Mode Status HUD Banner (Appears on F9 press) -->
+    <div id="hud-toast" class="hud-toast">
+      <span id="hud-toast-text">Ghost Mode Aktif (Tembus Klik)</span>
+    </div>
+
+    <!-- Hype Alert Banner for Mega Gifts / SuperChats -->
+    <div id="hype-alert-container" class="hype-alert-container"></div>
+
+    <!-- Chat Messages Feed List -->
+    <main class="chat-feed" id="chat-feed">
+      <div id="chat-list" class="chat-list">
+        <!-- Initial Ready Notice -->
+        <div class="chat-row notice-row">
+          <div class="notice-box">
+            AnxinityStream Siap. Hubungkan siaran YouTube atau TikTok di Studio Deck.
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Draggable Resize Grip at bottom right (Visible when unlocked) -->
+    <div class="resize-grip" title="Tarik untuk mengubah ukuran overlay"></div>
+
+  </div>
+
+  <script src="../../assets/icons.js"></script>
+  <script src="overlay.js"></script>
+</body>
+</html>

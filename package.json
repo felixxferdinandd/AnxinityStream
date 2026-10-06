@@ -1,0 +1,56 @@
+{
+  "name": "anxinity-stream",
+  "productName": "AnxinityStream",
+  "version": "1.0.0",
+  "description": "AnxinityStream - Professional Dual-Platform YouTube & TikTok Live Stream Overlay by Felix Ferdinand",
+  "main": "src/main.js",
+  "author": "Felix Ferdinand",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.felixferdinand.anxinitystream",
+    "productName": "AnxinityStream",
+    "copyright": "Copyright © 2026 Felix Ferdinand",
+    "npmRebuild": false,
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "executableName": "AnxinityStream",
+      "legalTrademarks": "Felix Ferdinand"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "AnxinityStream"
+    },
+    "directories": {
+      "output": "dist"
+    }
+  },
+  "keywords": [
+    "stream",
+    "overlay",
+    "youtube",
+    "tiktok",
+    "live",
+    "chat",
+    "anxinity"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "tiktok-connector": "^1.6.2",
+    "youtube-chat": "^2.2.0"
+  },
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3"
+  }
+}
