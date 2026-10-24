@@ -3,16 +3,42 @@ const path = require('path');
 const { app } = require('electron');
 
 const defaultSettings = {
-  opacity: 0.70,
-  fontSize: 'md',
+  // Visual & Overlay
+  opacity: 0.75,
+  fontSize: 'md', // sm, md, lg, xl
+  fontFamily: 'modern', // modern, gaming, mono
+  overlayTheme: 'cyber', // cyber, obsidian, glass, gold
+  bubbleStyle: 'card', // card, compact, pill
   showTimestamp: true,
+  alwaysOnTop: true,
+  showTransients: true, // Likes, shares, joins
+  platformFilter: 'all', // all, youtube, tiktok
+  maxChatHistory: 150,
+
+  // Audio Engine
   soundAlerts: true,
   soundVolume: 0.8,
-  alwaysOnTop: true,
+  soundProfile: 'cyber', // cyber, arcade, ding, casino, level
+  soundOnLock: true, // Audio cue on F9 ghost mode toggle
+
+  // Text-To-Speech (TTS) Voice Engine
+  ttsEnabled: false,
+  ttsFilter: 'highlight', // all, highlight (superchats/gifts), mod
+  ttsVolume: 0.8,
+  ttsRate: 1.0,
+  ttsPitch: 1.0,
+
+  // Moderation & Filters
+  antiSpam: true,
+  blacklistWords: '',
+  minGiftDiamonds: 1,
+
+  // Connection Resilience
+  autoReconnect: true,
   lastYoutubeInput: '',
   lastTiktokUsername: '',
-  tiktokSignApiKey: '',
-  showTransients: true, // Auto-disappearing like / follow / join notifications
+
+  // Overlay Dimensions & Position
   overlayWidth: 380,
   overlayHeight: 580,
   overlayX: null,
@@ -21,7 +47,7 @@ const defaultSettings = {
 
 class Storage {
   constructor() {
-    this.filePath = path.join(app.getPath('userData'), 'stream-helper-settings.json');
+    this.filePath = path.join(app.getPath('userData'), 'anxinity-stream-settings-v5.json');
     this.settings = this.load();
   }
 

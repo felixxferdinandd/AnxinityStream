@@ -1,8 +1,8 @@
 {
   "name": "anxinity-stream",
   "productName": "AnxinityStream",
-  "version": "1.0.0",
-  "description": "AnxinityStream - Professional Dual-Platform YouTube & TikTok Live Stream Overlay by Felix Ferdinand",
+  "version": "5.0.0",
+  "description": "AnxinityStream v5.0.0 Mega Studio Edition - Professional Dual-Platform YouTube & TikTok Live Stream Broadcast Suite by Felix Ferdinand",
   "main": "src/main.js",
   "author": "Felix Ferdinand",
   "scripts": {

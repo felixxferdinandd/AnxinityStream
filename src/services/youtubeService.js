@@ -6,24 +6,51 @@ class YoutubeService extends EventEmitter {
     super();
     this.liveChat = null;
     this.isConnected = false;
+    this.isManualDisconnect = false;
     this.currentInput = null;
+    this.parsedTarget = null;
+    
+    // Auto-reconnect
+    this.autoReconnect = true;
+    this.reconnectAttempt = 0;
+    this.maxReconnectAttempts = 5;
+    this.reconnectTimer = null;
+    this.packetsReceived = 0;
   }
 
   /**
    * Parse various YouTube URL formats or IDs into an object accepted by LiveChat
-   * Accepted:
-   * - https://www.youtube.com/watch?v=VIDEO_ID
-   * - https://youtu.be/VIDEO_ID
-   * - https://www.youtube.com/live/VIDEO_ID
-   * - https://www.youtube.com/@ChannelHandle
-   * - @ChannelHandle
-   * - https://www.youtube.com/channel/UCxxxxxx
-   * - UCxxxxxx (24 chars)
-   * - VIDEO_ID (11 chars)
    */
   static parseInput(rawInput) {
     if (!rawInput || typeof rawInput !== 'string') return null;
-    const str = rawInput.trim();
+    let str = rawInput.trim();
+
+    // Remove tracking queries like &ab_channel=..., &feature=..., etc.
+    // but preserve ?v=...
+    const urlObj = str.match(/^https?:\/\/[^\s]+/i);
+    if (urlObj) {
+      try {
+        const parsed = new URL(str);
+        // If it's a watch URL
+        if (parsed.searchParams.has('v')) {
+          return { liveId: parsed.searchParams.get('v') };
+        }
+        // If it's /live/VIDEO_ID or /@handle
+        const pathname = parsed.pathname;
+        if (pathname.startsWith('/live/')) {
+          const id = pathname.replace('/live/', '').split('/')[0];
+          if (id) return { liveId: id };
+        }
+        if (pathname.startsWith('/@')) {
+          return { handle: pathname.split('/')[1] || pathname };
+        }
+        if (pathname.startsWith('/channel/')) {
+          return { channelId: pathname.replace('/channel/', '').split('/')[0] };
+        }
+      } catch (e) {
+        // Fall back to regex
+      }
+    }
 
     // 1. Direct handle: @Channel
     if (str.startsWith('@')) {
@@ -74,68 +101,142 @@ class YoutubeService extends EventEmitter {
       throw new Error('Link atau ID YouTube tidak valid. Masukkan URL Video Live, Video ID, atau Handle @Channel.');
     }
 
+    this.clearReconnectTimer();
+    this.isManualDisconnect = false;
+
     if (this.isConnected) {
-      await this.disconnect();
+      await this.disconnect(true);
     }
 
     this.currentInput = rawInput;
-    this.emit('status', { status: 'connecting', platform: 'youtube', target });
+    this.parsedTarget = target;
+    this.emit('status', { 
+      status: 'connecting', 
+      platform: 'youtube', 
+      target,
+      attempt: this.reconnectAttempt > 0 ? this.reconnectAttempt : undefined
+    });
 
     try {
       this.liveChat = new LiveChat(target);
 
       this.liveChat.on('start', (liveId) => {
         this.isConnected = true;
+        this.reconnectAttempt = 0;
         this.emit('status', {
           status: 'connected',
           platform: 'youtube',
           liveId,
-          message: `Terhubung ke YouTube Live (${liveId})`
+          message: `Terhubung langsung ke YouTube Live (${liveId})`
         });
       });
 
       this.liveChat.on('end', (reason) => {
         this.isConnected = false;
-        this.emit('status', {
-          status: 'disconnected',
-          platform: 'youtube',
-          message: reason || 'Live stream YouTube telah berakhir'
-        });
+        if (!this.isManualDisconnect && this.autoReconnect) {
+          this.scheduleReconnect();
+        } else {
+          this.emit('status', {
+            status: 'disconnected',
+            platform: 'youtube',
+            message: reason || 'Live stream YouTube telah berakhir'
+          });
+        }
       });
 
       this.liveChat.on('error', (err) => {
         const errorMsg = err && err.message ? err.message : String(err);
-        this.emit('status', {
-          status: 'error',
-          platform: 'youtube',
-          message: `Error YouTube: ${errorMsg}`
-        });
+        this.isConnected = false;
+        
+        if (!this.isManualDisconnect && this.autoReconnect) {
+          this.scheduleReconnect();
+        } else {
+          this.emit('status', {
+            status: 'error',
+            platform: 'youtube',
+            message: `Error YouTube: ${errorMsg}`
+          });
+        }
       });
 
       this.liveChat.on('chat', (chatItem) => {
+        this.packetsReceived++;
         const parsed = this.formatChatMessage(chatItem);
         this.emit('message', parsed);
       });
 
-      const started = await this.liveChat.start();
+      // Timeout race: 14s max
+      const startPromise = this.liveChat.start();
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Koneksi YouTube time out (14 detik). Pastikan channel sedang LIVE.')), 14000);
+      });
+
+      const started = await Promise.race([startPromise, timeoutPromise]);
       if (!started) {
-        throw new Error('Gagal memulai koneksi YouTube Live. Pastikan channel sedang LIVE.');
+        throw new Error('Gagal memulai koneksi YouTube Live. Pastikan channel sedang aktif siaran.');
       }
 
       return true;
     } catch (err) {
       this.isConnected = false;
+      const errorMsg = err.message || 'Gagal tersambung ke YouTube Live';
       this.emit('status', {
         status: 'error',
         platform: 'youtube',
-        message: err.message || 'Gagal tersambung ke YouTube Live'
+        message: errorMsg
       });
-      throw err;
+
+      if (!this.isManualDisconnect && this.autoReconnect && !errorMsg.includes('tidak valid')) {
+        this.scheduleReconnect();
+      }
+
+      throw new Error(errorMsg);
+    }
+  }
+
+  scheduleReconnect() {
+    if (this.reconnectAttempt >= this.maxReconnectAttempts) {
+      this.emit('status', {
+        status: 'error',
+        platform: 'youtube',
+        message: `Gagal menyambung ulang YouTube setelah ${this.maxReconnectAttempts} percobaan.`
+      });
+      return;
+    }
+
+    this.reconnectAttempt++;
+    const delays = [3000, 5000, 8000, 12000, 15000];
+    const delay = delays[this.reconnectAttempt - 1] || 10000;
+
+    this.emit('status', {
+      status: 'reconnecting',
+      platform: 'youtube',
+      attempt: this.reconnectAttempt,
+      maxAttempts: this.maxReconnectAttempts,
+      nextRetryMs: delay,
+      message: `Koneksi YouTube terputus. Mencoba reconnect otomatis (${this.reconnectAttempt}/${this.maxReconnectAttempts}) dalam ${delay / 1000}d...`
+    });
+
+    this.clearReconnectTimer();
+    this.reconnectTimer = setTimeout(async () => {
+      if (this.currentInput && !this.isManualDisconnect) {
+        try {
+          await this.connect(this.currentInput);
+        } catch (e) {
+          // Failure handled in catch
+        }
+      }
+    }, delay);
+  }
+
+  clearReconnectTimer() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
     }
   }
 
   formatChatMessage(chatItem) {
-    // Extract message text / emojis
     let messageText = '';
     if (Array.isArray(chatItem.message)) {
       messageText = chatItem.message
@@ -169,7 +270,6 @@ class YoutubeService extends EventEmitter {
       rawTimestamp: timestamp.getTime()
     };
 
-    // Check for SuperChat / SuperSticker
     if (chatItem.superchat) {
       result.type = 'superchat';
       result.superchat = {
@@ -182,21 +282,29 @@ class YoutubeService extends EventEmitter {
     return result;
   }
 
-  async disconnect() {
+  async disconnect(isSilent = false) {
+    this.isManualDisconnect = true;
+    this.clearReconnectTimer();
+
     if (this.liveChat) {
       try {
-        this.liveChat.stop('User disconnected');
+        await this.liveChat.stop();
       } catch (e) {
-        // ignore
+        // Suppress
       }
       this.liveChat = null;
     }
+
     this.isConnected = false;
-    this.emit('status', {
-      status: 'disconnected',
-      platform: 'youtube',
-      message: 'Koneksi YouTube terputus'
-    });
+    this.reconnectAttempt = 0;
+
+    if (!isSilent) {
+      this.emit('status', {
+        status: 'disconnected',
+        platform: 'youtube',
+        message: 'Koneksi YouTube telah diputuskan'
+      });
+    }
   }
 }
 

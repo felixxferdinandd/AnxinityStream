@@ -20,12 +20,12 @@ let isOverlayLocked = false; // Ghost mode / click-through
 
 function createControlWindow() {
   controlWindow = new BrowserWindow({
-    width: 880,
-    height: 680,
-    minWidth: 760,
-    minHeight: 560,
-    title: 'AnxinityStream - Broadcast Studio',
-    backgroundColor: '#090d14',
+    width: 980,
+    height: 730,
+    minWidth: 860,
+    minHeight: 620,
+    title: 'AnxinityStream v5.0.0 - Broadcast Mega Studio',
+    backgroundColor: '#070b12',
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
@@ -74,7 +74,7 @@ function createOverlayWindow() {
     hasShadow: false,
     skipTaskbar: false,
     backgroundColor: '#00000000',
-    title: 'AnxinityStream Overlay',
+    title: 'AnxinityStream Overlay v5.0.0',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -154,6 +154,7 @@ app.whenReady().then(() => {
   tiktokService.on('status', (data) => broadcastToWindows('status-update', data));
   tiktokService.on('message', (data) => broadcastToWindows('chat-message', data));
   tiktokService.on('stats', (data) => broadcastToWindows('stream-stats', data));
+  tiktokService.on('health', (data) => broadcastToWindows('stream-health', data));
 
   createControlWindow();
   createOverlayWindow();

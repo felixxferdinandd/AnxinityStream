@@ -60,5 +60,11 @@ contextBridge.exposeInMainWorld('api', {
     const handler = () => callback();
     ipcRenderer.on('clear-chat', handler);
     return () => ipcRenderer.removeListener('clear-chat', handler);
+  },
+
+  onStreamHealth: (callback) => {
+    const handler = (event, health) => callback(health);
+    ipcRenderer.on('stream-health', handler);
+    return () => ipcRenderer.removeListener('stream-health', handler);
   }
 });

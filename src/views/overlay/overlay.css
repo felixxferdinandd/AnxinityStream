@@ -1,9 +1,9 @@
 :root {
-  --overlay-opacity: 0.70;
-  --bg-color-rgb: 12, 16, 23; /* #0c1017 */
+  --overlay-opacity: 0.75;
+  --bg-color-rgb: 8, 12, 19;
   
   --yt-red: #ff0000;
-  --yt-red-bright: #ff3333;
+  --yt-red-bright: #ff4d4d;
   --tt-cyan: #00f2fe;
   --tt-pink: #fe2c55;
   
@@ -12,12 +12,107 @@
   --text-muted: #94a3b8;
   
   --font-base: 13px;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Font Scales */
 body.font-sm { --font-base: 11px; }
 body.font-md { --font-base: 13px; }
 body.font-lg { --font-base: 15px; }
+body.font-xl { --font-base: 17px; }
+
+/* Font Families */
+body.font-family-modern {
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+body.font-family-gaming {
+  --font-family: "Impact", "Arial Black", -apple-system, sans-serif;
+}
+body.font-family-mono {
+  --font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* ================= 4 THEME PRESETS ================= */
+/* 1. Cyberpunk Neon (Default) */
+body.theme-cyber {
+  --bg-color-rgb: 7, 11, 20;
+}
+body.theme-cyber .overlay-container {
+  border: 1px solid rgba(0, 242, 254, 0.25);
+  box-shadow: inset 0 0 15px rgba(0, 242, 254, 0.08);
+}
+body.theme-cyber .chat-row {
+  border-left: 2px solid rgba(0, 242, 254, 0.3);
+}
+
+/* 2. Obsidian Dark Pro */
+body.theme-obsidian {
+  --bg-color-rgb: 4, 6, 10;
+}
+body.theme-obsidian .overlay-container {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+body.theme-obsidian .chat-row {
+  border-left: 2px solid rgba(56, 189, 248, 0.2);
+}
+
+/* 3. Glass Minimalist */
+body.theme-glass {
+  --bg-color-rgb: 15, 23, 42;
+}
+body.theme-glass .overlay-container {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+body.theme-glass .chat-row {
+  border-left: none;
+}
+
+/* 4. Gold Luxury */
+body.theme-gold {
+  --bg-color-rgb: 18, 14, 5;
+}
+body.theme-gold .overlay-container {
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: inset 0 0 15px rgba(245, 158, 11, 0.1);
+}
+body.theme-gold .chat-row {
+  border-left: 2px solid rgba(245, 158, 11, 0.4);
+}
+
+/* ================= 3 BUBBLE STYLES ================= */
+/* 1. Card Mode */
+body.bubble-card .chat-row {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 6px;
+  padding: 4px 6px;
+  margin-bottom: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* 2. Compact Line Mode */
+body.bubble-compact .chat-row {
+  background: transparent;
+  padding: 1px 0;
+  margin-bottom: 2px;
+  border-left: none !important;
+}
+body.bubble-compact .avatar-box {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+}
+
+/* 3. Floating Pill Mode */
+body.bubble-pill .chat-row {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 3px 10px;
+  margin-bottom: 4px;
+}
 
 * {
   box-sizing: border-box;
@@ -26,7 +121,7 @@ body.font-lg { --font-base: 15px; }
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-family);
   background: transparent;
   color: var(--text-primary);
   height: 100vh;
@@ -42,16 +137,16 @@ body {
   height: 100vh;
   width: 100vw;
   background-color: rgba(var(--bg-color-rgb), var(--overlay-opacity));
-  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   overflow: hidden;
   position: relative;
-  transition: border-color 0.2s ease, background-color 0.15s ease;
+  transition: border-color 0.2s ease, background-color 0.15s ease, box-shadow 0.2s ease;
 }
 
 /* Locked (Ghost Mode) state */
 body.locked .overlay-container {
-  border-color: transparent;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 body.locked .overlay-header {
@@ -73,7 +168,7 @@ body.locked .resize-grip {
   align-items: center;
   justify-content: space-between;
   padding: 5px 8px;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.6);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   -webkit-app-region: drag;
   flex-shrink: 0;
@@ -149,24 +244,30 @@ body.locked .resize-grip {
   transition: all 0.2s ease;
 }
 
-.yt-chip.offline {
+.yt-chip.offline, .tt-chip.offline {
   opacity: 0.35;
   filter: grayscale(1);
 }
 
 .yt-chip.online {
   opacity: 1;
-  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.6));
-}
-
-.tt-chip.offline {
-  opacity: 0.35;
-  filter: grayscale(1);
+  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.7));
 }
 
 .tt-chip.online {
   opacity: 1;
-  filter: drop-shadow(0 0 4px rgba(0, 242, 254, 0.6));
+  filter: drop-shadow(0 0 4px rgba(0, 242, 254, 0.7));
+}
+
+.platform-chip.reconnecting {
+  opacity: 1;
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8));
+  animation: pulseAmber 1s infinite alternate;
+}
+
+@keyframes pulseAmber {
+  from { transform: scale(1); opacity: 0.6; }
+  to { transform: scale(1.1); opacity: 1; }
 }
 
 /* Header Right: Direct Opacity Slider */
@@ -246,24 +347,24 @@ body.locked .icon-locked { display: block; }
   top: 10px;
   left: 50%;
   transform: translateX(-50%) translateY(-20px);
-  background: rgba(15, 23, 42, 0.95);
+  background: rgba(7, 11, 20, 0.95);
   border: 1px solid #38bdf8;
-  color: #f8fafc;
-  padding: 5px 12px;
-  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
+  padding: 6px 14px;
+  border-radius: 20px;
   font-size: 11px;
-  font-weight: 600;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  font-weight: 700;
+  color: #ffffff;
   pointer-events: none;
   opacity: 0;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 999;
   white-space: nowrap;
 }
 
 .hud-toast.show {
-  transform: translateX(-50%) translateY(0);
   opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 /* Chat Feed */
@@ -271,31 +372,24 @@ body.locked .icon-locked { display: block; }
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 8px 10px 12px;
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
 }
 
 .chat-feed::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
+
 .chat-feed::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
 }
 
 .chat-list {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-}
-
-/* Ready Notice */
-.notice-row {
-  display: flex;
-  justify-content: center;
-  margin: 4px 0;
 }
 
 .notice-box {
@@ -318,7 +412,6 @@ body.locked .icon-locked { display: block; }
   word-break: break-word;
   animation: slideIn 0.15s ease-out;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 3px rgba(0, 0, 0, 0.8);
-  margin-bottom: 4px;
 }
 
 @keyframes slideIn {
@@ -377,7 +470,7 @@ body.locked .icon-locked { display: block; }
   line-height: 1.38;
 }
 
-/* Inline Platform Icon (beside username) */
+/* Inline Platform Icon */
 .inline-platform-badge {
   display: inline-flex;
   align-items: center;
@@ -426,13 +519,22 @@ body.hide-timestamp .msg-time {
 .author-badge {
   font-size: 9px;
   font-weight: 700;
-  background: rgba(234, 179, 8, 0.2);
-  color: #facc15;
-  border: 1px solid rgba(234, 179, 8, 0.4);
   padding: 0 4px;
   border-radius: 3px;
   margin-right: 4px;
   vertical-align: middle;
+}
+
+.author-badge.member {
+  background: rgba(234, 179, 8, 0.25);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.5);
+}
+
+.author-badge.mod {
+  background: rgba(16, 185, 129, 0.25);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.5);
 }
 
 .msg-text {
@@ -440,7 +542,13 @@ body.hide-timestamp .msg-time {
   vertical-align: middle;
 }
 
-/* Transient Events (Likes, Joins, Follows) - Auto-Disappearing Without Collision */
+.msg-gift-compact {
+  color: #fde047;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+/* Transient Events (Likes, Joins, Follows) */
 .transient-row {
   display: flex;
   align-items: center;
@@ -489,9 +597,9 @@ body.hide-timestamp .msg-time {
 /* HYPE / LEBAY GIFT ALERT CARD (TikTok Gift) */
 .hype-gift-card {
   position: relative;
-  background: linear-gradient(135deg, rgba(254, 44, 85, 0.35), rgba(0, 242, 254, 0.25), rgba(15, 23, 42, 0.85));
+  background: linear-gradient(135deg, rgba(254, 44, 85, 0.4), rgba(0, 242, 254, 0.3), rgba(15, 23, 42, 0.9));
   border: 2px solid #00f2fe;
-  box-shadow: 0 0 16px rgba(0, 242, 254, 0.4), 0 0 24px rgba(254, 44, 85, 0.3), inset 0 0 12px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 16px rgba(0, 242, 254, 0.4), 0 0 24px rgba(254, 44, 85, 0.35), inset 0 0 12px rgba(255, 255, 255, 0.15);
   border-radius: 10px;
   padding: 10px 12px;
   margin: 8px 0;
@@ -544,10 +652,10 @@ body.hide-timestamp .msg-time {
 }
 
 .hype-gift-icon-wrapper {
-  width: 42px;
-  height: 42px;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -562,8 +670,8 @@ body.hide-timestamp .msg-time {
 }
 
 .hype-gift-img {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   object-fit: contain;
 }
 
@@ -574,29 +682,39 @@ body.hide-timestamp .msg-time {
 
 .hype-gift-title {
   font-size: calc(var(--font-base) + 2px);
-  font-weight: 800;
-  color: #f8fafc;
+  font-weight: 900;
+  color: #fde047;
+  text-shadow: 0 0 6px rgba(253, 224, 71, 0.5);
 }
 
 .hype-gift-count {
-  font-size: calc(var(--font-base) + 6px);
-  font-weight: 900;
-  color: #fde047;
-  text-shadow: 0 0 10px rgba(253, 224, 71, 0.8);
-  font-family: Impact, sans-serif;
-  letter-spacing: 0.5px;
+  font-size: calc(var(--font-base) + 1px);
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.hype-gift-diamonds {
+  font-size: 10px;
+  font-weight: 700;
+  color: #67e8f9;
 }
 
 /* HYPE SUPERCHAT CARD (YouTube) */
 .hype-superchat-card {
   position: relative;
-  background: linear-gradient(135deg, rgba(255, 0, 0, 0.35), rgba(180, 20, 20, 0.25), rgba(15, 23, 42, 0.9));
-  border: 2px solid #ff3333;
-  box-shadow: 0 0 16px rgba(255, 0, 0, 0.35), inset 0 0 10px rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.4), rgba(234, 179, 8, 0.3), rgba(15, 23, 42, 0.9));
+  border: 2px solid #eab308;
+  box-shadow: 0 0 16px rgba(234, 179, 8, 0.45), 0 0 24px rgba(255, 0, 0, 0.35);
   border-radius: 10px;
   padding: 10px 12px;
   margin: 8px 0;
-  animation: giftPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: scPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scPop {
+  0% { transform: scale(0.85); opacity: 0; }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .hype-sc-header {
@@ -607,21 +725,17 @@ body.hide-timestamp .msg-time {
 }
 
 .hype-sc-amount {
-  font-size: calc(var(--font-base) + 3px);
+  font-size: calc(var(--font-base) + 2px);
   font-weight: 900;
-  background: #ff0000;
-  color: #ffffff;
-  padding: 2px 8px;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+  color: #fef08a;
+  text-shadow: 0 0 8px rgba(254, 240, 138, 0.8);
 }
 
 .hype-sc-msg {
-  font-size: calc(var(--font-base) + 1px);
-  font-weight: 600;
-  color: #fef2f2;
-  margin-top: 4px;
+  font-size: var(--font-base);
+  color: #ffffff;
   line-height: 1.4;
+  margin-top: 4px;
 }
 
 /* Resize Grip */
@@ -632,6 +746,5 @@ body.hide-timestamp .msg-time {
   width: 14px;
   height: 14px;
   cursor: se-resize;
-  background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.3) 50%);
-  border-bottom-right-radius: 6px;
+  background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.35) 50%);
 }
