@@ -95,12 +95,22 @@
           <input type="text" id="input-pc-ip" class="mobile-input" placeholder="IP PC (contoh: 192.168.1.5:19890)" value="192.168.1.5:19890" />
           <button id="btn-connect-pc" class="btn-primary">Hubungkan</button>
         </div>
+
+        <div id="wifi-diag-box" class="diag-box">
+          <div class="diag-header">
+            <span class="diag-dot" id="diag-dot"></span>
+            <span class="diag-status-text" id="diag-status-text">Status: Siap Menghubungkan</span>
+          </div>
+          <div class="diag-hint" id="diag-hint">
+            Pastikan aplikasi <strong>AnxinityStream di PC sudah dibuka</strong> dan HP Anda terhubung ke <strong>WiFi yang sama</strong> dengan PC (IP PC: 192.168.1.5).
+          </div>
+        </div>
       </div>
 
-      <!-- Mode 2: Direct Standalone Connection -->
+      <!-- Mode 2: Remote Stream Control -->
       <div id="conn-panel-direct" class="conn-panel">
         <p class="conn-desc">
-          Sambungkan langsung dari HP tanpa perlu menyalakan PC (Bebas login & tanpa password).
+          Kendalikan live stream TikTok & YouTube langsung dari HP Anda.
         </p>
         
         <!-- TikTok Direct -->
@@ -113,7 +123,7 @@
         </div>
 
         <!-- YouTube Direct -->
-        <div class="direct-field-group" style="margin-top: 10px;">
+        <div class="direct-field-group" style="margin-top: 12px;">
           <label class="field-label">YouTube Live (URL, ID Video, atau @Handle):</label>
           <div class="conn-input-row">
             <input type="text" id="input-direct-yt" class="mobile-input" placeholder="https://youtube.com/watch?v=..." />
@@ -209,9 +219,25 @@
       </div>
     </div>
 
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Animated Dialog Modal -->
+    <div id="app-dialog-modal" class="dialog-modal-backdrop">
+      <div class="dialog-card">
+        <div class="dialog-icon-wrapper" id="dialog-icon-slot"></div>
+        <div class="dialog-title" id="dialog-title">Pemberitahuan</div>
+        <div class="dialog-message" id="dialog-message"></div>
+        <div class="dialog-actions">
+          <button id="dialog-btn-confirm" class="btn-primary dialog-btn">Mengerti</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script src="icons.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
+
