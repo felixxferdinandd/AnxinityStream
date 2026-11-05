@@ -3,6 +3,7 @@ const path = require('path');
 const Storage = require('./services/storage');
 const YoutubeService = require('./services/youtubeService');
 const TiktokService = require('./services/tiktokService');
+const LanCompanionServer = require('./services/lanServer');
 
 // Restrict to single instance
 const gotTheLock = app.requestSingleInstanceLock();
@@ -16,6 +17,7 @@ let overlayWindow = null;
 let storage = null;
 let youtubeService = null;
 let tiktokService = null;
+let lanServer = null;
 let isOverlayLocked = false; // Ghost mode / click-through
 
 function createControlWindow() {
@@ -125,6 +127,9 @@ function broadcastToWindows(channel, data) {
   if (overlayWindow && !overlayWindow.isDestroyed()) {
     overlayWindow.webContents.send(channel, data);
   }
+  if (lanServer) {
+    lanServer.broadcast(channel, data);
+  }
 }
 
 function registerHotkeys() {
@@ -160,6 +165,10 @@ app.whenReady().then(() => {
   createOverlayWindow();
   registerHotkeys();
 
+  // Start LAN companion server for Mobile APK synchronization
+  lanServer = new LanCompanionServer(19890);
+  lanServer.start();
+
   // Handle second instance request
   app.on('second-instance', () => {
     if (controlWindow) {
@@ -171,6 +180,7 @@ app.whenReady().then(() => {
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
+  if (lanServer) lanServer.stop();
 });
 
 app.on('window-all-closed', () => {

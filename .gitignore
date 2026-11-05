@@ -6,7 +6,14 @@ package-lock.json
 dist/
 build/
 *.exe
+*.apk
+*.aab
 *.blockmap
+.gradle/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
 
 # Environment & logs
 .env

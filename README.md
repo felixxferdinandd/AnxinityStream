@@ -63,20 +63,51 @@ AnxinityStream v5.0.0 Mega Studio Edition adalah suite aplikasi desktop Windows 
 
 ---
 
-## Perbandingan Versi: Portable vs Setup Installer
+## Perbandingan Distribusi: Setup Installer vs Portable vs Android APK
 
-Aplikasi v5.0.0 disediakan dalam dua bentuk distribusi binary resmi:
+Aplikasi v5.0.0 disediakan dalam 3 bentuk distribusi binary resmi:
 
-| Aspek | Portable Edition (`AnxinityStream 5.0.0.exe`) | Setup Installer (`AnxinityStream Setup 5.0.0.exe`) |
-| :--- | :--- | :--- |
-| **Instalasi** | Tanpa instalasi. Langsung jalan saat file diklik dua kali. | Wizard instalasi standar Windows. |
-| **Penyimpanan** | Mandiri (*standalone*), fleksibel ditaruh di flashdisk atau folder game. | Terpasang rapi di direktori program sistem (`AppData/Local/Programs`). |
-| **Shortcut** | Tidak otomatis membuat shortcut. | Otomatis membuat shortcut di Desktop dan Start Menu. |
-| **Pencopotan** | Cukup hapus file exe untuk mencopot. | Terdaftar di Windows Settings / Control Panel untuk uninstalasi bersih. |
-| **Rekomendasi Penggunaan** | Pengguna yang sering berpindah perangkat atau ingin mencoba cepat tanpa modifikasi sistem. | Streamer harian yang ingin integrasi penuh di komputer utama. |
+| Aspek | Setup Installer (`AnxinityStream Setup 5.0.0.exe`) | Portable Edition (`AnxinityStream 5.0.0.exe`) | Android Mobile Companion (`AnxinityStream-Mobile-v5.0.0.apk`) |
+| :--- | :--- | :--- | :--- |
+| **Platform Target** | Windows 10 / 11 64-bit | Windows 10 / 11 64-bit | Android 7.0 (Nougat) hingga Android 15+ |
+| **Instalasi** | Wizard instalasi standar Windows. | Tanpa instalasi. Langsung jalan saat diklik. | Pasang file .apk langsung di smartphone Android. |
+| **Penyimpanan** | Terpasang rapi di direktori program sistem (`AppData/Local/Programs`). | Mandiri (*standalone*), fleksibel ditaruh di flashdisk. | Terinstal sebagai aplikasi native di HP. |
+| **Shortcut** | Otomatis membuat shortcut di Desktop dan Start Menu. | Tidak otomatis membuat shortcut. | Tampil di App Drawer dan Home Screen HP. |
+| **Pencopotan** | Terdaftar di Control Panel untuk uninstalasi bersih. | Cukup hapus file exe. | Uninstall biasa melalui Settings HP. |
+| **Tujuan & Keunggulan** | Streamer harian di komputer utama dengan integrasi OS penuh. | Pengguna yang sering berpindah PC / warnet tanpa install. | Menaruh HP di stand meja gaming untuk membaca live chat, jumlah penonton, likes, joins, dan donasi tanpa membebani monitor utama. |
 
-Kedua versi binary dapat diunduh melalui halaman GitHub Releases:  
+Ketiga file binary dapat diunduh langsung melalui halaman GitHub Releases:  
 https://github.com/felixxferdinandd/AnxinityStream/releases
+
+---
+
+## AnxinityStream Mobile Companion (Aplikasi HP Android)
+
+Aplikasi Android khusus (`AnxinityStream-Mobile-v5.0.0.apk`) diciptakan agar live streamer yang bermain game di PC dapat membaca komentar dan memantau siaran langsung secara nyaman melalui layar ponsel di meja, tanpa perlu membuka window tambahan di monitor PC.
+
+### Fitur Utama Mobile Companion:
+1. **Layar Penuh Khusus Baca Chat**: Tampilan bersih, kontras tinggi, bebas distraksi.
+2. **Sinkronisasi WiFi Real-Time Tanpa Kuota**: Otomatis tersambung ke AnxinityStream PC via jaringan lokal WiFi (port 19890) sehingga tidak menyedot kuota data HP.
+3. **Pemantau Interaksi Lengkap**:
+   - Jumlah penonton siaran langsung (Live Viewers Counter).
+   - Akumulasi tap Likes TikTok.
+   - Durasi siaran langsung (Uptime Clock).
+   - Event interaksi penonton masuk: penonton bergabung (*bergabung ke live*), memberikan likes, dan membagikan siaran live.
+   - Banner kartu donasi lebay untuk TikTok Gifts dan YouTube SuperChats.
+4. **Font Stepper Instan (A- / A+)**: Pilihan 4 ukuran font (Normal 14px, Besar 18px, Ekstra 22px, Raksasa 26px) agar teks terbaca jelas dari jarak meja gaming.
+5. **Screen WakeLock**: Menjaga layar HP selalu menyala selama siaran tanpa mati otomatis.
+6. **Haptic Vibration**: Getaran halus saat donasi atau gift masuk ke siaran.
+7. **Filter Kategori Cepat**: Tombol filter satu ketukan untuk memilah Komentar Saja, Gift Saja, Interaksi Saja, YouTube Saja, atau TikTok Saja.
+
+### Cara Memasang dan Menggunakan di HP Android:
+1. Unduh `AnxinityStream-Mobile-v5.0.0.apk` dari GitHub Releases ke HP Anda.
+2. Buka file APK di HP Anda dan izinkan *Install from unknown sources / Pasang aplikasi tidak dikenal* jika diminta.
+3. Pastikan HP dan PC berada dalam satu jaringan WiFi yang sama.
+4. Buka aplikasi AnxinityStream di HP.
+5. Klik ikon WiFi di pojok atas, masukkan IP PC Anda (contoh: `192.168.1.5:19890`), lalu tekan **Sambungkan ke PC**.
+6. Semua komentar, penonton, likes, joins, dan gift akan otomatis terkirim ke HP secara instan.
+
+> **Tips Alternatif Browser:** Anda juga dapat membuka URL `http://<IP-PC-ANDA>:19890` langsung dari browser Chrome / Safari di HP tanpa harus memasang APK!
 
 ---
 
@@ -124,6 +155,22 @@ https://github.com/felixxferdinandd/AnxinityStream/releases
 - Penambahan sistem sensor kata terlarang (blacklist) dan filter anti-spam.
 - Penambahan umpan balik nada akustik saat Hotkey F9 ditekan.
 - Optimalisasi layout Broadcast Center ke resolusi 980x730 untuk kenyamanan multitasking.
+
+---
+
+## Catatan Masalah yang Diketahui (Known Issues) & Solusi Praktis
+
+### 1. TikTok LIVE Tidak Dapat Terhubung atau Delay Tersambung
+- **Penyebab**: Server TikTok terkadang membatasi initial handshake websocket pada room live yang baru saja dimulai atau jika IP Anda melakukan reconnect berulang dalam waktu singkat.
+- **Solusi Sementara (Workaround)**:
+  1. Masukkan username streamer TikTok Anda di tab **Broadcast Center**.
+  2. Buka tab **Simulator Siaran**, lalu klik tombol **Pancing Chat TikTok** atau **Pancing Like TikTok**.
+  3. Setelah ada event pancingan simulasi masuk, tekan tombol **Sambungkan** pada kolom TikTok di tab Broadcast Center. Socket akan terhubung dengan stabil.
+  4. Bila diperlukan, Anda juga dapat memasukkan API Key Signer TikTok opsional pada menu Pengaturan Lanjutan.
+
+### 2. Teks Chat Bertumpuk / Overlap Saat Event Masuk Cepat
+- **Status di v5.0.0**: **Telah Diperbaiki (Fixed)**.
+- Seluruh baris chat kini dilengkapi `gap` fleksibel dan `flex-shrink: 0` serta animasi transisi keluar yang halus tanpa pergeseran sumbu negatif, sehingga gelembung chat tidak akan saling menabrak.
 
 ---
 

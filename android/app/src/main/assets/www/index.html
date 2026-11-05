@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>AnxinityStream Mobile</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="font-size-large">
+
+  <!-- Main Mobile App Layout -->
+  <div class="mobile-app">
+    
+    <!-- Top Stream Monitor Header -->
+    <header class="mobile-header">
+      <div class="header-top-row">
+        <div class="brand-group">
+          <span id="brand-logo-slot"></span>
+          <div class="brand-text">
+            <span class="brand-title">AnxinityStream</span>
+            <span class="brand-subtitle">MOBILE READER</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button id="btn-toggle-connect" class="hdr-btn" title="Pengaturan Koneksi">
+            <span id="wifi-icon-slot"></span>
+          </button>
+          <button id="btn-open-settings" class="hdr-btn" title="Pengaturan Tampilan">
+            <span id="settings-icon-slot"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Stream Metrics Bar -->
+      <div class="metrics-bar">
+        <!-- Live Viewers -->
+        <div class="metric-pill viewers-pill">
+          <span class="pulse-ring"></span>
+          <span id="viewers-icon-slot"></span>
+          <span class="metric-val" id="metric-viewers-count">0</span>
+          <span class="metric-label">Penonton</span>
+        </div>
+
+        <!-- Total Likes -->
+        <div class="metric-pill likes-pill">
+          <span id="likes-icon-slot"></span>
+          <span class="metric-val" id="metric-likes-count">0</span>
+          <span class="metric-label">Likes</span>
+        </div>
+
+        <!-- Uptime Clock -->
+        <div class="metric-pill timer-pill">
+          <span id="clock-icon-slot"></span>
+          <span class="metric-val" id="metric-uptime-count">00:00:00</span>
+        </div>
+
+        <!-- Status -->
+        <div class="metric-pill status-pill" id="metric-status-pill">
+          <span class="status-dot" id="status-dot"></span>
+          <span class="metric-val" id="metric-status-text">STANDBY</span>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills Bar (Horizontal Scroll) -->
+      <nav class="filter-pills-bar">
+        <button class="filter-pill active" data-filter="all">Semua</button>
+        <button class="filter-pill" data-filter="chat">💬 Komentar Saja</button>
+        <button class="filter-pill" data-filter="gifts">🎁 Gift & Donasi</button>
+        <button class="filter-pill" data-filter="interactions">⚡ Interaksi (Like/Join)</button>
+        <button class="filter-pill" data-filter="youtube">🔴 YouTube Saja</button>
+        <button class="filter-pill" data-filter="tiktok">🎵 TikTok Saja</button>
+      </nav>
+    </header>
+
+    <!-- Connection Drawer (Collapsible) -->
+    <div id="connection-drawer" class="connection-drawer">
+      <div class="drawer-header">
+        <span class="drawer-title">Hubungkan Siaran Streaming</span>
+        <button id="btn-close-drawer" class="drawer-close">&times;</button>
+      </div>
+
+      <!-- Connection Mode Tabs -->
+      <div class="conn-mode-tabs">
+        <button class="conn-tab active" data-conn="wifi">Sync ke PC (WiFi LAN)</button>
+        <button class="conn-tab" data-conn="direct">Koneksi Mandiri (HP)</button>
+      </div>
+
+      <!-- Mode 1: WiFi Companion Sync -->
+      <div id="conn-panel-wifi" class="conn-panel active">
+        <p class="conn-desc">
+          Hubungkan HP ke aplikasi AnxinityStream di PC melalui jaringan WiFi yang sama untuk membaca chat langsung tanpa membebani kuota HP.
+        </p>
+        <div class="conn-input-row">
+          <input type="text" id="input-pc-ip" class="mobile-input" placeholder="IP PC (contoh: 192.168.1.5:19890)" value="192.168.1.5:19890" />
+          <button id="btn-connect-pc" class="btn-primary">Hubungkan</button>
+        </div>
+      </div>
+
+      <!-- Mode 2: Direct Standalone Connection -->
+      <div id="conn-panel-direct" class="conn-panel">
+        <p class="conn-desc">
+          Sambungkan langsung dari HP tanpa perlu menyalakan PC (Bebas login & tanpa password).
+        </p>
+        
+        <!-- TikTok Direct -->
+        <div class="direct-field-group">
+          <label class="field-label">TikTok LIVE (@username saat sedang LIVE):</label>
+          <div class="conn-input-row">
+            <input type="text" id="input-direct-tt" class="mobile-input" placeholder="contoh: mooniyelle" />
+            <button id="btn-connect-tt-direct" class="btn-cyan">Sambungkan</button>
+          </div>
+        </div>
+
+        <!-- YouTube Direct -->
+        <div class="direct-field-group" style="margin-top: 10px;">
+          <label class="field-label">YouTube Live (URL, ID Video, atau @Handle):</label>
+          <div class="conn-input-row">
+            <input type="text" id="input-direct-yt" class="mobile-input" placeholder="https://youtube.com/watch?v=..." />
+            <button id="btn-connect-yt-direct" class="btn-red">Sambungkan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Chat Feed Screen -->
+    <main class="chat-feed-container" id="chat-feed-container">
+      <div class="chat-feed-list" id="chat-feed-list">
+        <!-- Welcome banner -->
+        <div class="welcome-card">
+          <div class="welcome-title">AnxinityStream Mobile Siap</div>
+          <div class="welcome-body">
+            Gunakan tombol <strong>WiFi</strong> di kanan atas untuk menyambungkan HP ke PC Anda atau masukkan username TikTok Anda langsung.
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Floating Action Buttons -->
+    <div class="floating-dock">
+      <!-- Jump to latest button -->
+      <button id="btn-jump-latest" class="btn-jump" style="display: none;">
+        <span>⬇️ Pesan Baru</span>
+      </button>
+
+      <!-- Quick Font Size & Clear Bar -->
+      <div class="dock-actions-bar">
+        <div class="font-stepper">
+          <span class="stepper-label">Ukuran Teks:</span>
+          <button id="btn-font-decrease" class="step-btn">A-</button>
+          <span id="current-font-label" class="step-val">Besar</span>
+          <button id="btn-font-increase" class="step-btn">A+</button>
+        </div>
+        <button id="btn-clear-feed" class="btn-clear" title="Bersihkan Layar">
+          <span id="trash-icon-slot"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title">Pengaturan Mobile Reader</h3>
+          <button id="btn-close-settings" class="modal-close">&times;</button>
+        </div>
+
+        <div class="settings-list">
+          <!-- Wakelock -->
+          <label class="setting-item">
+            <div class="setting-text">
+              <span class="setting-name">Layar Tetap Menyala (Wakelock)</span>
+              <span class="setting-sub">Mencegah layar HP mati/sleep otomatis saat live</span>
+            </div>
+            <input type="checkbox" id="toggle-wakelock" checked class="mobile-toggle" />
+          </label>
+
+          <!-- Vibration -->
+          <label class="setting-item">
+            <div class="setting-text">
+              <span class="setting-name">Getar HP Saat Ada Gift & Donasi</span>
+              <span class="setting-sub">Getaran haptic saat ada penonton kirim gift</span>
+            </div>
+            <input type="checkbox" id="toggle-vibration" checked class="mobile-toggle" />
+          </label>
+
+          <!-- Sound Alert -->
+          <label class="setting-item">
+            <div class="setting-text">
+              <span class="setting-name">Suara Notifikasi Audio Synthesizer</span>
+              <span class="setting-sub">Bunyikan nada lonceng saat ada gift TikTok & SuperChat</span>
+            </div>
+            <input type="checkbox" id="toggle-sound" checked class="mobile-toggle" />
+          </label>
+
+          <!-- TTS Voice -->
+          <label class="setting-item">
+            <div class="setting-text">
+              <span class="setting-name">Bacakan Gift Lewat Suara (TTS)</span>
+              <span class="setting-sub">HP akan membacakan nama pengirim gift</span>
+            </div>
+            <input type="checkbox" id="toggle-tts" class="mobile-toggle" />
+          </label>
+        </div>
+
+        <button id="btn-save-settings" class="btn-primary" style="margin-top: 18px; width: 100%;">
+          Tutup & Simpan
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="icons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
