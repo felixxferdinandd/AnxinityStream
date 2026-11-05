@@ -169,6 +169,40 @@ app.whenReady().then(() => {
   lanServer = new LanCompanionServer(19890);
   lanServer.start();
 
+  lanServer.on('client-command', async (cmd, ws) => {
+    try {
+      if (cmd.action === 'connect-tiktok' && cmd.target) {
+        const currentSettings = storage.get();
+        const apiKey = currentSettings.tiktokSignApiKey || '';
+        storage.update({ lastTiktokUsername: cmd.target });
+        const res = await tiktokService.connect(cmd.target, apiKey);
+        if (ws && ws.readyState === 1) {
+          ws.send(JSON.stringify({
+            channel: 'command-result',
+            action: 'connect-tiktok',
+            target: cmd.target,
+            success: res ? res.success : false,
+            error: res ? res.error : 'Gagal'
+          }));
+        }
+      } else if (cmd.action === 'connect-youtube' && cmd.target) {
+        storage.update({ lastYoutubeInput: cmd.target });
+        const res = await youtubeService.connect(cmd.target);
+        if (ws && ws.readyState === 1) {
+          ws.send(JSON.stringify({
+            channel: 'command-result',
+            action: 'connect-youtube',
+            target: cmd.target,
+            success: res ? res.success : false,
+            error: res ? res.error : 'Gagal'
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('[LAN Server] Error processing mobile command:', err.message);
+    }
+  });
+
   // Handle second instance request
   app.on('second-instance', () => {
     if (controlWindow) {

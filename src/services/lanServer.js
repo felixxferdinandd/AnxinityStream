@@ -2,10 +2,12 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const EventEmitter = require('events');
 const { WebSocketServer, WebSocket } = require('ws');
 
-class LanCompanionServer {
+class LanCompanionServer extends EventEmitter {
   constructor(port = 19890) {
+    super();
     this.port = port;
     this.httpServer = null;
     this.wss = null;
@@ -80,6 +82,13 @@ class LanCompanionServer {
           }));
         }
 
+        ws.on('message', (raw) => {
+          try {
+            const data = JSON.parse(raw.toString());
+            this.emit('client-command', data, ws);
+          } catch (e) {}
+        });
+
         ws.on('close', () => {
           this.clients.delete(ws);
         });
@@ -134,3 +143,4 @@ class LanCompanionServer {
 }
 
 module.exports = LanCompanionServer;
+

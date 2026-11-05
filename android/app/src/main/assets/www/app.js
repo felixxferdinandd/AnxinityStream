@@ -51,6 +51,104 @@ const btnFontIncrease = document.getElementById('btn-font-increase');
 const currentFontLabel = document.getElementById('current-font-label');
 const btnClearFeed = document.getElementById('btn-clear-feed');
 
+// Diagnostics & Toast Elements
+const diagDot = document.getElementById('diag-dot');
+const diagStatusText = document.getElementById('diag-status-text');
+const diagHint = document.getElementById('diag-hint');
+const toastContainer = document.getElementById('toast-container');
+const appDialogModal = document.getElementById('app-dialog-modal');
+const dialogIconSlot = document.getElementById('dialog-icon-slot');
+const dialogTitle = document.getElementById('dialog-title');
+const dialogMessage = document.getElementById('dialog-message');
+const dialogBtnConfirm = document.getElementById('dialog-btn-confirm');
+
+// ================= ANIMATED IN-APP TOAST SYSTEM =================
+function showToast(message, type = 'info', duration = 3500) {
+  if (!toastContainer) return;
+
+  const toast = document.createElement('div');
+  toast.className = `mobile-toast toast-${type}`;
+
+  let iconSvg = ICONS.info;
+  if (type === 'warning') iconSvg = ICONS.warning;
+  if (type === 'error') iconSvg = ICONS.error;
+  if (type === 'success') iconSvg = ICONS.check;
+
+  toast.innerHTML = `
+    <div class="toast-icon-wrap">${iconSvg}</div>
+    <div class="toast-msg">${escapeHtml(message)}</div>
+    <div class="toast-progress"></div>
+  `;
+
+  const progressBar = toast.querySelector('.toast-progress');
+  if (progressBar) {
+    progressBar.style.transition = `transform ${duration}ms linear`;
+    setTimeout(() => {
+      progressBar.style.transform = 'scaleX(0)';
+    }, 20);
+  }
+
+  // Trigger haptic vibration
+  if (type === 'error') triggerVibrate(150);
+  else if (type === 'warning') triggerVibrate(90);
+  else triggerVibrate(50);
+
+  // Click to dismiss
+  toast.addEventListener('click', () => {
+    dismissToast(toast);
+  });
+
+  toastContainer.appendChild(toast);
+
+  const timer = setTimeout(() => {
+    dismissToast(toast);
+  }, duration);
+
+  toast._timer = timer;
+}
+
+function dismissToast(toast) {
+  if (!toast || toast._dismissed) return;
+  toast._dismissed = true;
+  clearTimeout(toast._timer);
+  toast.classList.add('toast-closing');
+  setTimeout(() => {
+    if (toast.parentNode) toast.parentNode.removeChild(toast);
+  }, 260);
+}
+
+function showDialog({ title = 'Pemberitahuan', message, type = 'warning' }) {
+  if (!appDialogModal) return;
+
+  dialogTitle.textContent = title;
+  dialogMessage.textContent = message;
+
+  dialogIconSlot.className = `dialog-icon-wrapper ${type}`;
+  let iconSvg = ICONS.warning;
+  if (type === 'error') iconSvg = ICONS.error;
+  if (type === 'success') iconSvg = ICONS.check;
+  if (type === 'info') iconSvg = ICONS.info;
+  dialogIconSlot.innerHTML = iconSvg;
+
+  appDialogModal.classList.add('open');
+
+  if (type === 'error') triggerVibrate(160);
+  else triggerVibrate(80);
+}
+
+if (dialogBtnConfirm) {
+  dialogBtnConfirm.addEventListener('click', () => {
+    appDialogModal.classList.remove('open');
+  });
+}
+if (appDialogModal) {
+  appDialogModal.addEventListener('click', (e) => {
+    if (e.target === appDialogModal) {
+      appDialogModal.classList.remove('open');
+    }
+  });
+}
+
 // App State
 let activeFilter = 'all';
 let socket = null;
@@ -112,6 +210,7 @@ function saveSettings() {
   } catch (e) {}
 
   applyWakelock(settings.wakelock);
+  showToast('Pengaturan berhasil disimpan', 'success', 2200);
   if (window.AndroidBridge) {
     window.AndroidBridge.showToast('Pengaturan berhasil disimpan');
   }
@@ -460,21 +559,36 @@ function connectToPcCompanion(address) {
   metricStatusPill.className = 'metric-pill status-pill';
   metricStatusText.textContent = 'CONNECTING...';
 
+  if (diagDot) {
+    diagDot.className = 'diag-dot';
+    diagStatusText.textContent = 'Menghubungkan ke ' + target + '...';
+    diagHint.textContent = 'Mencari server AnxinityStream PC di jaringan WiFi...';
+  }
+
+  let wasConnected = false;
+
   try {
     socket = new WebSocket(target);
 
     socket.onopen = () => {
       isConnected = true;
+      wasConnected = true;
       metricStatusPill.className = 'metric-pill status-pill online';
       metricStatusText.textContent = 'SYNCED TO PC';
       startUptimeClock();
-      connectionDrawer.classList.remove('open');
 
-      if (window.AndroidBridge) {
-        window.AndroidBridge.showToast('Tersambung ke AnxinityStream PC!');
+      if (diagDot) {
+        diagDot.className = 'diag-dot online';
+        diagStatusText.textContent = 'Terhubung ke PC (' + target + ')';
+        diagHint.innerHTML = 'Data siaran, chat, penonton, dan donasi tersinkronisasi secara real-time.';
       }
 
-      // Add connected banner
+      showToast('Berhasil terhubung ke PC AnxinityStream!', 'success', 2800);
+      setTimeout(() => {
+        if (connectionDrawer) connectionDrawer.classList.remove('open');
+      }, 1000);
+
+      // Add connected banner in feed
       const banner = document.createElement('div');
       banner.className = 'welcome-card';
       banner.innerHTML = `
@@ -498,6 +612,20 @@ function connectToPcCompanion(address) {
           }
         } else if (payload.channel === 'status-update') {
           // Status updates
+        } else if (payload.channel === 'command-result') {
+          if (payload.action === 'connect-tiktok') {
+            if (payload.success) {
+              showToast('TikTok @' + (payload.target || '') + ' tersambung di PC!', 'success', 3000);
+            } else {
+              showToast('TikTok gagal: ' + (payload.error || 'Stream offline'), 'error', 4000);
+            }
+          } else if (payload.action === 'connect-youtube') {
+            if (payload.success) {
+              showToast('YouTube Live tersambung di PC!', 'success', 3000);
+            } else {
+              showToast('YouTube gagal: ' + (payload.error || 'Live stream tidak ditemukan'), 'error', 4000);
+            }
+          }
         } else if (payload.channel === 'clear-chat') {
           chatFeedList.innerHTML = '';
         }
@@ -510,13 +638,25 @@ function connectToPcCompanion(address) {
     };
 
     socket.onclose = () => {
+      if (wasConnected) {
+        showToast('Koneksi ke PC terputus.', 'warning', 3000);
+      } else {
+        showToast('Gagal terhubung ke PC (' + target + '). Pastikan aplikasi PC AnxinityStream sudah dibuka!', 'error', 4500);
+      }
+
       isConnected = false;
       metricStatusPill.className = 'metric-pill status-pill';
       metricStatusText.textContent = 'OFFLINE';
       stopUptimeClock();
+
+      if (diagDot) {
+        diagDot.className = 'diag-dot error';
+        diagStatusText.textContent = 'PC Tidak Terjangkau';
+        diagHint.innerHTML = 'Gagal tersambung ke <strong>' + target + '</strong>. Pastikan aplikasi <strong>AnxinityStream di PC sudah dibuka</strong> dan HP Anda berada dalam <strong>satu jaringan WiFi</strong>.';
+      }
     };
   } catch (err) {
-    alert('Gagal menghubungkan ke ' + target + '. Pastikan PC dan HP dalam satu jaringan WiFi.');
+    showToast('Alamat IP atau port tidak valid: ' + target, 'error', 3500);
   }
 }
 
@@ -524,7 +664,7 @@ function connectToPcCompanion(address) {
 btnConnectPc.addEventListener('click', () => {
   const ip = inputPcIp.value.trim();
   if (!ip) {
-    alert('Masukkan IP dan Port PC Anda (contoh: 192.168.1.5:19890)');
+    showToast('Masukkan IP dan Port PC Anda (contoh: 192.168.1.5:19890)', 'warning', 3500);
     return;
   }
   settings.pcIp = ip;
@@ -532,40 +672,60 @@ btnConnectPc.addEventListener('click', () => {
   connectToPcCompanion(ip);
 });
 
-// Standalone Direct Connect Handlers
+// Remote Stream Control Handlers
 btnConnectTtDirect.addEventListener('click', () => {
   const user = inputDirectTt.value.trim();
-  if (!user) return alert('Masukkan username TikTok');
-  // Send connect command to bridge or direct
+  if (!user) {
+    showToast('Masukkan username TikTok terlebih dahulu', 'warning', 3500);
+    return;
+  }
+
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify({ action: 'connect-tiktok', target: user }));
-    connectionDrawer.classList.remove('open');
-    if (window.AndroidBridge) window.AndroidBridge.showToast('Menghubungkan ke TikTok @' + user);
+    showToast('Memulai live TikTok @' + user + ' di PC...', 'info', 2500);
+    setTimeout(() => {
+      if (connectionDrawer) connectionDrawer.classList.remove('open');
+    }, 800);
   } else {
-    // If not connected to PC, auto-connect to PC first or notify
+    showToast('Menghubungkan ke PC terlebih dahulu...', 'info', 2500);
     connectToPcCompanion(inputPcIp.value.trim());
     setTimeout(() => {
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ action: 'connect-tiktok', target: user }));
+        showToast('Tersambung ke PC! Menghubungkan TikTok @' + user, 'success', 3000);
+        setTimeout(() => {
+          if (connectionDrawer) connectionDrawer.classList.remove('open');
+        }, 800);
       }
-    }, 1500);
+    }, 1800);
   }
 });
 
 btnConnectYtDirect.addEventListener('click', () => {
   const yt = inputDirectYt.value.trim();
-  if (!yt) return alert('Masukkan link YouTube Live');
+  if (!yt) {
+    showToast('Masukkan link atau ID siaran YouTube Live', 'warning', 3500);
+    return;
+  }
+
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify({ action: 'connect-youtube', target: yt }));
-    connectionDrawer.classList.remove('open');
-    if (window.AndroidBridge) window.AndroidBridge.showToast('Menghubungkan ke YouTube...');
+    showToast('Memulai live YouTube di PC...', 'info', 2500);
+    setTimeout(() => {
+      if (connectionDrawer) connectionDrawer.classList.remove('open');
+    }, 800);
   } else {
+    showToast('Menghubungkan ke PC terlebih dahulu...', 'info', 2500);
     connectToPcCompanion(inputPcIp.value.trim());
     setTimeout(() => {
       if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ action: 'connect-youtube', target: yt }));
+        showToast('Tersambung ke PC! Menghubungkan YouTube...', 'success', 3000);
+        setTimeout(() => {
+          if (connectionDrawer) connectionDrawer.classList.remove('open');
+        }, 800);
       }
-    }, 1500);
+    }, 1800);
   }
 });
 
@@ -607,3 +767,4 @@ window.addEventListener('DOMContentLoaded', () => {
     connectToPcCompanion(settings.pcIp);
   }
 });
+
